@@ -135,7 +135,7 @@ class GitShell(PyShell):
         self.init()
         for remote in remote_list:
             if len(remote) > 0:
-                self.add_remote(remote[0], remote[1], override=True)
+                self.add_remote(remote[0], remote[1])
             if fetch_all:
                 self.cmd("fetch %s" % remote[0])
 
@@ -153,8 +153,11 @@ class GitShell(PyShell):
         return True, '', ''
 
     def add_remote(self, name, url, override=False, **kwargs):
-        if override is True:
+        old_url = self.cmd('remote', 'get-url', name)[1]
+
+        if override is True or (old_url.strip() != url.strip()):
             self.cmd('remote', 'remove', name, **kwargs)
+
         self.cmd('remote', 'add', name, url, **kwargs)
 
         return True, '', ''
