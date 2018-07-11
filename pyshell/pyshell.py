@@ -153,16 +153,21 @@ class GitShell(PyShell):
         return True, '', ''
 
     def add_remote(self, name, url, override=False, **kwargs):
-        old_url = self.cmd('remote', 'get-url', name)[1]
+        name = name.strip()
+        url = url.strip()
+        old_url = self.cmd('remote', 'get-url', name)[1].strip()
 
-        if override is True or (old_url.strip() != url.strip()):
+        if override is True or (old_url != url):
             self.cmd('remote', 'remove', name, **kwargs)
-
-        self.cmd('remote', 'add', name, url, **kwargs)
+            self.cmd('remote', 'add', name, url, **kwargs)
 
         return True, '', ''
 
     def push(self, lbranch, remote, rbranch, force=False, use_refs=False, **kwargs):
+        # Make sure its not /n terminated.
+        lbranch = lbranch.strip()
+        remote =  remote.strip()
+        rbranch = rbranch.strip()
         if use_refs is True:
             rbranch = 'refs/for/' + rbranch
         if force is True:
