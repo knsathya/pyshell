@@ -156,13 +156,42 @@ class GitShell(PyShell):
         remote = remote.strip()
         branch = branch.strip()
 
+        if branch is None and len(branch) == 0:
+            return False
+
         if remote is not None and len(remote) > 0:
             branch = remote + '/' + branch
+            return (self.cmd("branch -r --list %s" % branch)[1].strip() == branch)
 
-        if self.cmd("branch --list %s" % branch)[1].strip() == branch:
-            return True
+        return (self.cmd("branch --list %s" % branch)[1].strip() == branch)
 
-        return False
+    def merge(self, lbranch=None, remote=None, rbranch=None, no_ff=False, add_log=False, abort=False, **kwargs):
+
+        options = []
+        ret = (0, '', '')
+
+        if no_ff:
+            options.append('--no-ff')
+        if add_log:
+            options.append('--log')
+
+        if abort is True:
+            return self.cmd('merge', '--abort', **kwargs)
+        else:
+            if self.valid_branch(branch=lbranch):
+                self.cmd("checkout", lbranch)
+            else:
+                return -1, '', 'Invalid branch %s' % lbranch
+
+            if not self.valid_branch(remote, rbranch):
+                return -1, '', 'Invalid branch %s' % rbranch
+
+            if remote is not None and len(remote) > 0:
+                ret = self.cmd('pull', ' '.join(options), rbranch, **kwargs)
+            else:
+                ret = self.cmd('merge', ' '.join(options), rbranch, **kwargs)
+
+        return ret
 
     def add_remote(self, name, url, override=False, **kwargs):
         name = name.strip()
