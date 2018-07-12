@@ -152,6 +152,18 @@ class GitShell(PyShell):
 
         return True, '', ''
 
+    def valid_branch(self, remote=None, branch='HEAD', **kwargs):
+        remote = remote.strip()
+        branch = branch.strip()
+
+        if remote is not None and len(remote) > 0:
+            branch = remote + '/' + branch
+
+        if self.cmd("branch --list %s" % branch)[1].strip() == branch:
+            return True
+
+        return False
+
     def add_remote(self, name, url, override=False, **kwargs):
         name = name.strip()
         url = url.strip()
@@ -170,6 +182,10 @@ class GitShell(PyShell):
         rbranch = rbranch.strip()
         if use_refs is True:
             rbranch = 'refs/for/' + rbranch
+
+        if not self.valid_branch(remote, rbranch):
+            force = True
+        
         if force is True:
             return self.cmd('push','-f', remote, lbranch + ':' + rbranch, ** kwargs)
         else:
