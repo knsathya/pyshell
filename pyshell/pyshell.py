@@ -153,13 +153,13 @@ class GitShell(PyShell):
         return True, '', ''
 
     def valid_branch(self, remote=None, branch='HEAD', **kwargs):
-        remote = remote.strip()
-        branch = branch.strip()
-
-        if branch is None and len(branch) == 0:
+        if branch is None or len(branch) == 0:
             return False
 
+        branch = branch.strip()
+
         if remote is not None and len(remote) > 0:
+            remote = remote.strip()
             branch = remote + '/' + branch
             return (self.cmd("branch -r --list %s" % branch)[1].strip() == branch)
 
@@ -194,8 +194,14 @@ class GitShell(PyShell):
         return ret
 
     def add_remote(self, name, url, override=False, **kwargs):
+
+        for entry in [name, url]:
+            if entry is None or len(entry) == 0:
+                return False, '', 'Invalid remote %s' % [name, url]
+
         name = name.strip()
         url = url.strip()
+
         old_url = self.cmd('remote', 'get-url', name)[1].strip()
 
         if override is True or (old_url != url):
@@ -205,10 +211,15 @@ class GitShell(PyShell):
         return True, '', ''
 
     def push(self, lbranch, remote, rbranch, force=False, use_refs=False, **kwargs):
+        for entry in [lbranch, remote, rbranch]:
+            if entry is None or len(entry) == 0:
+                return False, '', 'Invalid arguments %s' [lbranch, remote, rbranch]
+
         # Make sure its not /n terminated.
         lbranch = lbranch.strip()
         remote =  remote.strip()
         rbranch = rbranch.strip()
+
         if use_refs is True:
             rbranch = 'refs/for/' + rbranch
 
