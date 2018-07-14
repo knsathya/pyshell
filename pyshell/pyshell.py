@@ -159,11 +159,21 @@ class GitShell(PyShell):
         branch = branch.strip()
 
         if remote is not None and len(remote) > 0:
-            remote = remote.strip()
+            remote = remote.strip('*').strip()
             branch = remote + '/' + branch
-            return (self.cmd("branch -r --list %s" % branch)[1].strip() == branch)
+            return (self.cmd("branch -r --list %s" % branch)[1].strip('*').strip() == branch)
 
-        return (self.cmd("branch --list %s" % branch)[1].strip() == branch)
+        return (self.cmd("branch --list %s" % branch)[1].strip('*').strip() == branch)
+
+    def inprogress(self, **kwargs):
+        for pfile in ['MERGE_HEAD', 'REBASE_HEAD']:
+            if os.path.exists(os.path.join(kwargs.get('wd', self.wd), '.git', pfile)):
+                return True
+
+        if len(self.cmd('rerere diff')[1].strip()) > 0:
+            return True
+
+        return False
 
     def merge(self, lbranch=None, remote=None, rbranch=None, no_ff=False, add_log=False, abort=False, **kwargs):
 
