@@ -166,7 +166,7 @@ class GitShell(PyShell):
         return (self.cmd("branch --list %s" % branch)[1].strip('*').strip() == branch)
 
     def inprogress(self, **kwargs):
-        for pfile in ['MERGE_HEAD', 'REBASE_HEAD']:
+        for pfile in ['MERGE_HEAD', 'REBASE_HEAD', 'rebase-apply']:
             if os.path.exists(os.path.join(kwargs.get('wd', self.wd), '.git', pfile)):
                 return True
 
