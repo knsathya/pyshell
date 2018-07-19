@@ -80,7 +80,7 @@ class PyShell(object):
                         break
                 else:
                     identifier, line = item
-                    print identifier + ':', line
+                    print(identifier + ':', line)
                     if out_log is True:
                         self.logger.info(identifier + ': ' + line)
 
