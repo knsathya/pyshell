@@ -20,7 +20,14 @@ import os
 import logging
 from subprocess import Popen, PIPE
 from threading import Thread
-from Queue import Queue, Empty
+import sys
+
+is_py2 = sys.version[0] == '2'
+
+if is_py2:
+    from Queue import Queue, Empty
+else:
+    from queue import Queue, Empty
 
 GIT_COMMAND_PATH='/usr/bin/git'
 
