@@ -20,7 +20,7 @@ from __future__ import absolute_import
 
 import os
 import unittest
-import pyshell
+from pyshell import PyShell, GitShell
 import logging
 import re
 
@@ -30,7 +30,7 @@ logger.setLevel(logging.INFO)
 
 class PyShellTest(unittest.TestCase):
     def test_pyshell_ls(self):
-        sh = pyshell.PyShell(logger=logger)
+        sh = PyShell(logger=logger)
         ret = sh.cmd('ls')
         if ret[0] != 0:
             AssertionError("ls command failed\n")
@@ -38,7 +38,7 @@ class PyShellTest(unittest.TestCase):
             logger.info(ret[1])
 
     def test_pyshell_ps(self):
-        sh = pyshell.PyShell(logger=logger)
+        sh = PyShell(logger=logger)
         ret = sh.cmd('ps', '-aux')
         if ret[0] != 0:
             AssertionError("ps command failed\n")
@@ -46,7 +46,7 @@ class PyShellTest(unittest.TestCase):
             logger.info(ret[1])
 
     def test_git_version(self):
-        git = pyshell.GitShell(logger=logger)
+        git = GitShell(logger=logger)
         version = git.cmd('--version')[1]
         if re.match(r'git version \d+\.\d+\.\d+', version):
             logger.info(version)
