@@ -16,5 +16,5 @@
 #
 #
 
-from pyshell.pyshell import PyShell
-from pyshell.pyshell import GitShell
+from pyshell import PyShell
+from pyshell import GitShell
