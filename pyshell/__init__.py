@@ -16,5 +16,5 @@
 #
 #
 
-from pyshell.shell_libs import PyShell
-from pyshell.shell_libs import GitShell
+from pyshell._pyshell import PyShell
+from pyshell._pyshell import GitShell
