@@ -122,9 +122,12 @@ class PyShell(object):
                 self.logger.debug("STDOUT: " + _output)
             if len(_error) > 0 and out_log is True:
                 self.logger.error("STDERR: " + _error)
-
-        self.cmd_out = ''.join(output)
-        self.cmd_err = ''.join(error)
+        if is_py2:
+            self.cmd_out = ''.join(output)
+            self.cmd_err = ''.join(error)
+        else:
+            self.cmd_out = b" ".join(output)
+            self.cmd_err = b" ".join(error)
         self.cmd_ret = process.returncode
 
         return self.cmd_ret, self.cmd_out, self.cmd_err
