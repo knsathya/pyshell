@@ -20,6 +20,7 @@ import os
 import logging
 from subprocess import Popen, PIPE
 from threading import Thread
+from builtins import str
 import sys
 
 is_py2 = sys.version[0] == '2'
@@ -138,6 +139,10 @@ class PyShell(object):
                          dry_run=kwargs.get('dry_run', False),
                          shell=kwargs.get('shell', False))
 
+
+fmt_bname = lambda x: x.strip('*').strip() if x is not None and len(x) > 0 else x
+fmt_name = lambda x: x.strip() if x is not None and len(x) > 0 else x
+
 class GitShell(PyShell):
     def __init__(self, wd=os.getcwd(), init=False, remote_list=[], fetch_all=False, stream_stdout=False, logger=None):
         super(GitShell, self).__init__(wd=wd, stream_stdout=stream_stdout, logger = logger)
@@ -156,6 +161,13 @@ class GitShell(PyShell):
     def valid(self,  **kwargs):
         return True if os.path.exists(os.path.join(kwargs.get('wd', self.wd), '.git')) else False
 
+    def _valid_str(self, strlist=[], lencheck=False):
+        for entry in strlist:
+            if entry is None or not isinstance(entry, str) or (lencheck and (len(entry) == 0)):
+                return False
+
+        return True
+
     def init(self, **kwargs):
         if not self.valid(**kwargs):
             self.cmd('init', '.', **kwargs)
@@ -166,14 +178,17 @@ class GitShell(PyShell):
         if branch is None or len(branch) == 0:
             return False
 
-        branch = branch.strip()
+        branch = fmt_bname(branch)
 
         if remote is not None and len(remote) > 0:
             remote = remote.strip('*').strip()
             branch = remote + '/' + branch
             return (self.cmd("branch -r --list %s" % branch)[1].strip('*').strip() == branch)
 
-        return (self.cmd("branch --list %s" % branch)[1].strip('*').strip() == branch)
+        return (fmt_bname(self.cmd("branch --list %s" % branch)[1]) == branch)
+
+    def checkout(self, remote=None, branch=None):
+        return (self.cmd("checkout %s" % branch if remote is None else remote + '/' + branch)[0] == 0)
 
     def inprogress(self, **kwargs):
         for pfile in ['MERGE_HEAD', 'REBASE_HEAD', 'rebase-apply']:
@@ -215,12 +230,11 @@ class GitShell(PyShell):
 
     def add_remote(self, name, url, override=False, **kwargs):
 
-        for entry in [name, url]:
-            if entry is None or len(entry) == 0:
-                return False, '', 'Invalid remote %s' % [name, url]
+        if not self._valid_str([name, url], True):
+            return False, '', 'Invalid remote %s' % [name, url]
 
-        name = name.strip()
-        url = url.strip()
+        name = fmt_name(name)
+        url = fmt_name(url)
 
         old_url = self.cmd('remote', 'get-url', name)[1].strip()
 
@@ -231,8 +245,7 @@ class GitShell(PyShell):
         return True, '', ''
 
     def push(self, lbranch, remote, rbranch, force=False, use_refs=False, **kwargs):
-        for entry in [lbranch, remote, rbranch]:
-            if entry is None or len(entry) == 0:
+        if not self._valid_str([lbranch, remote, rbranch], True):
                 return False, '', 'Invalid arguments %s' [lbranch, remote, rbranch]
 
         # Make sure its not /n terminated.
