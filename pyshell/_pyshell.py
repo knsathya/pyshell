@@ -188,7 +188,8 @@ class GitShell(PyShell):
         return (fmt_bname(self.cmd("branch --list %s" % branch)[1]) == branch)
 
     def checkout(self, remote=None, branch=None):
-        return (self.cmd("checkout %s" % branch if remote is None else remote + '/' + branch)[0] == 0)
+        branch = branch if remote is None else remote + '/' + branch
+        return (self.cmd("checkout %s" % branch)[0] == 0)
 
     def inprogress(self, **kwargs):
         for pfile in ['MERGE_HEAD', 'REBASE_HEAD', 'rebase-apply']:
@@ -246,7 +247,7 @@ class GitShell(PyShell):
 
     def push(self, lbranch, remote, rbranch, force=False, use_refs=False, **kwargs):
         if not self._valid_str([lbranch, remote, rbranch], True):
-                return False, '', 'Invalid arguments %s' [lbranch, remote, rbranch]
+                return False, '', 'Invalid arguments %s' % [lbranch, remote, rbranch]
 
         # Make sure its not /n terminated.
         lbranch = lbranch.strip()
