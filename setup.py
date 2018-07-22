@@ -42,7 +42,9 @@ setup(name='pyshell',
       license='GPLv2',
       packages=['pyshell'],
       install_requires=[
-
+          'future',
+          'six',
+          'validoot'
       ],
       test_suite='tests',
       tests_require=[
