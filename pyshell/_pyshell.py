@@ -163,8 +163,12 @@ class GitShell(PyShell):
 
     def _valid_str(self, strlist=[], lencheck=False):
         for entry in strlist:
-            if entry is None or not isinstance(entry, str) or (lencheck and (len(entry) == 0)):
-                return False
+            if is_py2:
+                if entry is None or not isinstance(entry, basestring) or (lencheck and (len(entry) == 0)):
+                    return False
+            else:
+                if entry is None or not isinstance(entry, str) or (lencheck and (len(entry) == 0)):
+                    return False
 
         return True
 
