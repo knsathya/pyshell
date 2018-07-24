@@ -191,6 +191,30 @@ class GitShell(PyShell):
 
         return (fmt_bname(self.cmd("branch --list %s" % branch)[1]) == branch)
 
+    def delete(self, branch, remote=None, force=False):
+        branch = fmt_bname(branch)
+        remote = fmt_bname(remote)
+
+        # First check whether this is a valid local branch
+        if self.valid_branch(branch=branch):
+            if self.current_branch() == branch:
+                headsha =  self.head_sha()
+                self.cmd("checkout %s~1" % headsha)
+            if force is True:
+                ret = self.cmd("branch -D %s" % branch)
+                if ret[0] != 0:
+                    return ret
+            else:
+                ret =  self.cmd("branch -d %s" % branch)
+                if ret[0] != 0:
+                    return ret
+
+        if self.valid_branch(remote, branch):
+            return self.cmd("push %s --delete %s" % (remote, branch))
+
+        return False, '', 'Invalid arguments'
+
+
     def checkout(self, remote=None, branch=None):
         branch = branch if remote is None else remote + '/' + branch
         return (self.cmd("checkout %s" % branch)[0] == 0)
