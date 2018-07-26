@@ -220,7 +220,11 @@ class GitShell(PyShell):
         return (self.cmd("checkout %s" % branch)[0] == 0)
 
     def inprogress(self, **kwargs):
-        for pfile in ['MERGE_HEAD', 'REBASE_HEAD', 'rebase-apply']:
+        merge_list = ['MERGE_HEAD']
+        rebase_list = ['REBASE_HEAD', 'rebase-apply']
+        cherry_list = ['CHERRY_PICK_HEAD', 'sequencer']
+        progress_list = merge_list + rebase_list + cherry_list
+        for pfile in progress_list:
             if os.path.exists(os.path.join(kwargs.get('wd', self.wd), '.git', pfile)):
                 return True
 
