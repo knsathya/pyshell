@@ -21,6 +21,7 @@ import logging
 from subprocess import Popen, PIPE
 from threading import Thread
 from builtins import str
+from builtins import bytes
 import sys
 
 is_py2 = sys.version[0] == '2'
@@ -54,6 +55,8 @@ class PyShell(object):
         self.logger.debug(args)
         self.logger.debug('wd=%s, out_log=%s, dry_run=%s, shell=%s' % (wd, out_log, dry_run, shell))
         self.logger.info("Executing " + ' '.join(list(args)))
+        for i in range(len(args)):
+            args[i]=bytes(args[i].encode())
 
         if len(args) < 0:
             return -1, '', 'Argument invalid error'
@@ -179,7 +182,10 @@ class GitShell(PyShell):
         return True, '', ''
 
     def valid_branch(self, remote=None, branch='HEAD', **kwargs):
+        self.logger.info('Branch: %s', branch)
+        self.logger.info('remote: %s', remote)
         if branch is None or len(branch) == 0:
+            self.logger.info('branch is none or len of branch is 0')
             return False
 
         branch = fmt_bname(branch)
@@ -187,9 +193,12 @@ class GitShell(PyShell):
         if remote is not None and len(remote) > 0:
             remote = remote.strip('*').strip()
             branch = remote + '/' + branch
-            return (self.cmd("branch -r --list %s" % branch)[1].strip('*').strip() == branch)
+            self.logger.info('branch is none or len of branch is 0')
+            the_return=self.cmd("branch -r --list %s" % branch)[1].strip(b'*').strip().decode('utf-8')
+            self.logger.info('the retunr from selfcommand is: %s', the_return)
+            return (the_return == branch)
 
-        return (fmt_bname(self.cmd("branch --list %s" % branch)[1]) == branch)
+        return (fmt_bname(self.cmd("branch --list %s" % branch)[1].decode('utf-8')) == branch)
 
     def delete(self, branch, remote=None, force=False):
         branch = fmt_bname(branch)

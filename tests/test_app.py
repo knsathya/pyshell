@@ -48,7 +48,7 @@ class PyShellTest(unittest.TestCase):
     def test_git_version(self):
         git = GitShell(logger=logger)
         version = git.cmd('--version')[1]
-        if re.match(r'git version \d+\.\d+\.\d+', version):
+        if re.match(r'git version \d+\.\d+\.\d+'.encode(), version):
             logger.info(version)
         else:
             AssertionError("Git version command failed")
