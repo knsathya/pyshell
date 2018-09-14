@@ -33,6 +33,17 @@ else:
 GIT_COMMAND_PATH='/usr/bin/git'
 
 class PyShell(object):
+    """
+    Wrapper class for executing shell commands. Two main features of the class are, you can
+    execute the commands in any work directory by passing wd=<dir> name. Also you have option
+    to stream logs using stdout and logger realtime.
+
+    Usage:
+    Example1:
+        sh =  PyShell(wd=/)
+        sh.cmd('ls', shell=True)
+
+    """
     def __init__(self, wd=os.getcwd(), stream_stdout=False, logger=None):
         self.logger = logger or logging.getLogger(__name__)
         self.wd = wd
@@ -44,9 +55,24 @@ class PyShell(object):
         self.dry_run = False
 
     def dryrun(self, status=False):
+        """
+        Enable dryrun for given shell object.
+        Setting dry_run property will prevent the actual executing of commands. Its mainly used for debug purpose.
+        :param status: Set True | False
+        :return: None
+        """
         self.dry_run = status
 
     def _cmd(self, args=[], wd=None, out_log=False, dry_run=False, shell=False):
+        """
+        Helper function for executing the given shell commands.
+        :param args: List of shell command with arguments.
+        :param wd: Work directory.
+        :param out_log: Enable debug logging of this function.
+        :param dry_run: Enable dry_run for given command (this will overwrite self.dry_run property).
+        :param shell: Passed to subprocess.Popen function.
+        :return: tupule of error_code, out_log, error_log
+        """
         output = list()
         error = list()
         wd = wd if wd is not None else self.wd
