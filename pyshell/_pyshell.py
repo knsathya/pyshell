@@ -53,6 +53,10 @@ class PyShell(object):
         self.cmd_err = ''
         self.cmd_ret = 0
         self.dry_run = False
+        self.shell = '/bin/sh'
+
+    def update_shell(self, shell='/bin/bash'):
+        self.shell = shell
 
     def dryrun(self, status=False):
         """
@@ -101,7 +105,7 @@ class PyShell(object):
             if not stream.closed:
                 stream.close()
 
-        process = Popen(list(args), stdout=PIPE, stderr=PIPE, cwd=wd, shell=shell)
+        process = Popen(list(args), stdout=PIPE, stderr=PIPE, cwd=wd, shell=shell, executable=self.shell)
 
         def printer():
             while True:
@@ -114,9 +118,9 @@ class PyShell(object):
                         break
                 else:
                     identifier, line = item
-                    print(identifier + ':', line)
+                    print(line.strip('\n'))
                     if out_log is True:
-                        self.logger.info(identifier + ': ' + line)
+                        self.logger.info(line)
 
         def parse_output():
             while True:
@@ -139,22 +143,24 @@ class PyShell(object):
             Thread(target=stream_watcher, name='stdout-watcher', args=('STDOUT', process.stdout)).start()
             Thread(target=stream_watcher, name='stderr-watcher', args=('STDERR', process.stderr)).start()
             Thread(target=printer, name='printer').start()
-            parse_output()
+            Thread(target=parse_output, name='parse_output').start()
+            process.wait()
         else:
             _output, _error = process.communicate()
             output = [_output]
             error = [_error]
-
             if len(_output) > 0 and out_log is True:
                 self.logger.debug("STDOUT: " + _output)
             if len(_error) > 0 and out_log is True:
                 self.logger.error("STDERR: " + _error)
+
         if is_py2:
             self.cmd_out = ''.join(output)
             self.cmd_err = ''.join(error)
         else:
             self.cmd_out = b" ".join(output)
             self.cmd_err = b" ".join(error)
+
         self.cmd_ret = process.returncode
 
         return self.cmd_ret, self.cmd_out, self.cmd_err
