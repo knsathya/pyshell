@@ -108,7 +108,7 @@ class PyShell(object):
             if not stream.closed:
                 stream.close()
 
-        process = Popen(args, stdout=PIPE, stderr=PIPE, cwd=wd, shell=shell, executable=self.shell)
+        process = Popen(args, stdout=PIPE, stderr=PIPE, cwd=wd, shell=True, executable=self.shell)
 
         def printer():
             while True:
