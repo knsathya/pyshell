@@ -80,10 +80,13 @@ class PyShell(object):
         output = list()
         error = list()
         wd = wd if wd is not None else self.wd
+        if not isinstance(args, list):
+            args = list(args)
+        args = [' '.join(args)]
 
         self.logger.debug(args)
         self.logger.debug('wd=%s, out_log=%s, dry_run=%s, shell=%s' % (wd, out_log, dry_run, shell))
-        self.logger.info("Executing " + ' '.join(list(args)))
+        self.logger.info("Executing " + ' '.join(args))
 
         if len(args) < 0:
             return -1, '', 'Argument invalid error'
@@ -105,7 +108,7 @@ class PyShell(object):
             if not stream.closed:
                 stream.close()
 
-        process = Popen(list(args), stdout=PIPE, stderr=PIPE, cwd=wd, shell=shell, executable=self.shell)
+        process = Popen(args, stdout=PIPE, stderr=PIPE, cwd=wd, shell=shell, executable=self.shell)
 
         def printer():
             while True:
